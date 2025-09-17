@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Colorful Tic Tac Toe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    color: #222;
+    margin: 0; padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    user-select: none;
+  }
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    text-shadow: 2px 2px 5px #ffa500;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 120px);
+    grid-gap: 15px;
+    margin: 30px 0;
+  }
+  .cell {
+    width: 120px;
+    height: 120px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+    font-size: 6rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #555;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+    position: relative;
+  }
+  .cell:hover {
+    background-color: #fceabb;
+    color: #ff6f61;
+    transform: scale(1.1);
+  }
+  .cell.disabled {
+    cursor: default;
+    color: #999;
+    background-color: #eee;
+    box-shadow: none;
+    transform: none;
+  }
+  .cell.x {
+    color: #27ae60; /* green */
+  }
+  .cell.o {
+    color: #2980b9; /* blue */
+  }
+  #status {
+    font-size: 1.8rem;
+    font-weight: 600;
+    min-height: 40px;
+    color: #2c3e50;
+    text-shadow: 1px 1px 2px #ffa500;
+  }
+  #resetButton {
+    background: #ff6f61;
+    border: none;
+    padding: 12px 35px;
+    font-size: 1.2rem;
+    border-radius: 35px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(255,111,97,0.6);
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  #resetButton:hover {
+    background: #e05b4f;
+    transform: scale(1.1);
+  }
+</style>
+</head>
+<body>
+
+<h1>Colorful Tic Tac Toe</h1>
+<div class="board" id="board">
+  <div class="cell" data-index="0"></div>
+  <div class="cell" data-index="1"></div>
+  <div class="cell" data-index="2"></div>
+  <div class="cell" data-index="3"></div>
+  <div class="cell" data-index="4"></div>
+  <div class="cell" data-index="5"></div>
+  <div class="cell" data-index="6"></div>
+  <div class="cell" data-index="7"></div>
+  <div class="cell" data-index="8"></div>
+</div>
+
+<div id="status">Player X's turn</div>
+<button id="resetButton">Reset Game</button>
+
+<script>
+  const board = Array(9).fill(null);
+  const cells = document.querySelectorAll('.cell');
+  const statusDiv = document.getElementById('status');
+  const resetButton = document.getElementById('resetButton');
+
+  let currentPlayer = 'X';
+  let gameActive = true;
+
+  const winPatterns = [
+    [0,1,2], [3,4,5], [6,7,8],  // rows
+    [0,3,6], [1,4,7], [2,5,8],  // cols
+    [0,4,8], [2,4,6]            // diagonals
+  ];
+
+  function handleCellClick(e) {
+    const index = e.target.getAttribute('data-index');
+    if (!gameActive || board[index] !== null) return;
+
+    board[index] = currentPlayer;
+    e.target.textContent = currentPlayer;
+    e.target.classList.add(currentPlayer.toLowerCase());
+    e.target.classList.add('disabled');
+
+    if (checkWin(currentPlayer)) {
+      statusDiv.textContent = `🎉 Player ${currentPlayer} wins! 🎉`;
+      highlightWinningCells(currentPlayer);
+      gameActive = false;
+      return;
+    }
+    if (board.every(cell => cell !== null)) {
+      statusDiv.textContent = `🤝 It's a draw! 🤝`;
+      gameActive = false;
+      return;
+    }
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+  }
+
+  function checkWin(player) {
+    return winPatterns.some(pattern => 
+      pattern.every(index => board[index] === player)
+    );
+  }
+
+  function highlightWinningCells(player) {
+    for (const pattern of winPatterns) {
+      if (pattern.every(index => board[index] === player)) {
+        pattern.forEach(index => {
+          cells[index].style.backgroundColor = player === 'X' ? '#a8e6cf' : '#81d4fa';
+          cells[index].style.boxShadow = '0 0 20px 5px #ffeb3b';
+          cells[index].style.transform = 'scale(1.2)';
+        });
+        break;
+      }
+    }
+  }
+
+  function resetGame() {
+    board.fill(null);
+    cells.forEach(cell => {
+      cell.textContent = '';
+      cell.classList.remove('x', 'o', 'disabled');
+      cell.style.backgroundColor = '';
+      cell.style.boxShadow = '';
+      cell.style.transform = '';
+    });
+    currentPlayer = 'X';
+    gameActive = true;
+    statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+  }
+
+  cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+  resetButton.addEventListener('click', resetGame);
+</script>
+
+</body>
+</html>
